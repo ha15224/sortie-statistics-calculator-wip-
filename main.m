@@ -46,25 +46,15 @@ for i = 1:length(tally34)
     tally34(i).id = tally34(i).data.id;
     if tally34(i).reached == 1
         [tally34(i).bucket,tally34(i).hpspercentage] = countbucket(tally34(i).data);
+        tally34(i).fssunk = enemyfssunk(tally34(i).data);
+        tally34(i).bossrank = ratings(tally34(i).data);
     else
         tally34(i).bucket = 1;
+        tally34(i).fssunk = 0;
+        tally34(i).bossrank = 0;
     end
 end
 
-
-
-cumbucket = 0;
-cumaverage = zeros(count,1);
-for i = 1:count
-    cumbucket = cumbucket + tally34(i).bucket;
-    cumaverage(i) = cumbucket/i;
-end
-
-plot(cumaverage)
-ylim([0,max(cumaverage)+0.5])
-grid on
-xlabel('trials')
-ylabel('observed average bucket')
 
 
 
