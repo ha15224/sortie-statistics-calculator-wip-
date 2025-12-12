@@ -1,0 +1,42 @@
+(function() {
+
+    var sortieIds = [], bctr, sortieIndexed = {};
+
+    KC3Database.con.sortie
+        .filter(function(srt){ return srt.id >= 15625; })
+        .toArray(function(sortieList) {
+
+            for (bctr in sortieList) {
+                sortieIds.push(sortieList[bctr].id);
+                sortieIndexed["s" + sortieList[bctr].id] = sortieList[bctr];
+                sortieIndexed["s" + sortieList[bctr].id].battles = [];
+            }
+
+            KC3Database.con.battle
+                .where("sortie_id")
+                .anyOf(sortieIds)
+                .toArray(function(battleList) {
+
+                    for (bctr in battleList) {
+                        var key = "s" + battleList[bctr].sortie_id;
+                        if (sortieIndexed[key]) {
+                            sortieIndexed[key].battles.push(battleList[bctr]);
+                        } else {
+                            console.error("orphan battle", battleList[bctr]);
+                        }
+                    }
+
+                    var a = window.document.createElement('a');
+                    a.href = window.URL.createObjectURL(
+                        new Blob([JSON.stringify(sortieIndexed)], { type: 'application/json' })
+                    );
+                    a.download = 'KC3sortie_' + PlayerManager.hq.name + '_' +
+                        ((new Date()).toISOString().slice(0, 10).replace(/-/g, "")) + '.json';
+
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                });
+        });
+
+})();
