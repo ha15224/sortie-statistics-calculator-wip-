@@ -1,8 +1,28 @@
-function [output,hps] = countbucket(data)
+function [output,repairfuel,repairsteel] = countbucket(data)
 
 output = 0;
 
 maxhps = data.battles{2, 1}.data.api_f_maxhps;
+
+hps = data.battles{1, 1}.data.api_f_nowhps; % if already damaged at sortie, negate bucket consumption
+if hps(1) <= maxhps(1)/2
+    output = output - 1;
+end
+if hps(2) <= maxhps(2)/2
+    output = output - 1;
+end
+if hps(3) <= maxhps(3)/4
+    output = output - 1;
+end
+if hps(4) <= maxhps(4)/2
+    output = output - 1;
+end
+if hps(5) <= maxhps(5)/2
+    output = output - 1;
+end
+if hps(6) <= maxhps(6)/2
+    output = output - 1;
+end
 
 if isempty(fieldnames(data.battles{2, 1}.yasen))
     % ends day battle
@@ -10,6 +30,7 @@ if isempty(fieldnames(data.battles{2, 1}.yasen))
    
     % airstrike
     hps = hps - floor(data.battles{2, 1}.data.api_kouku.api_stage3.api_fdam);
+    if hps(3)<=0 hps(3) = 9; end % hatsuzuki damecon
 
     % otorps exist but only care about allied damage
 
@@ -28,6 +49,7 @@ if isempty(fieldnames(data.battles{2, 1}.yasen))
                 damage = sum(floor(data.battles{2, 1}.data.api_hougeki1.api_damage(i)));
             end
             hps(idx) = hps(idx) - damage;
+            if hps(3)<=0 hps(3) = 9; end % hatsuzuki damecon
         end
     end
 
@@ -46,6 +68,7 @@ if isempty(fieldnames(data.battles{2, 1}.yasen))
                 damage = sum(floor(data.battles{2, 1}.data.api_hougeki2.api_damage(i)));
             end
             hps(idx) = hps(idx) - damage;
+            if hps(3)<=0 hps(3) = 9; end % hatsuzuki damecon
         end
         end
     end
@@ -53,6 +76,7 @@ if isempty(fieldnames(data.battles{2, 1}.yasen))
     % ctorps
     if data.battles{2, 1}.data.api_hourai_flag(4) == 1
         hps = hps - floor(data.battles{2, 1}.data.api_raigeki.api_fdam(1:6));
+        if hps(3)<=0 hps(3) = 9; end % hatsuzuki damecon
     end
 else
     % ends night battle
@@ -67,30 +91,44 @@ else
         end
             damage = sum(floor(data.battles{2, 1}.yasen.api_hougeki.api_damage{i}));
             hps(idx) = hps(idx) - damage;
+            if hps(3)<=0 hps(3) = 9; end % hatsuzuki damecon
     end
     end
 end
+
+basefuel = [30;45;25;15;15;55];
+repairfuel = 0;
+repairsteel = 0;
 
 if hps(1) <= maxhps(1)/2
     output = output + 1;
+    repairfuel = repairfuel + floor((maxhps(1)-hps(1))*basefuel(1)*0.032);
+    repairsteel = repairsteel + floor((maxhps(1)-hps(1))*basefuel(1)*0.06);
 end
 if hps(2) <= maxhps(2)/2
     output = output + 1;
+    repairfuel = repairfuel + floor((maxhps(2)-hps(2))*basefuel(2)*0.032);
+    repairsteel = repairsteel + floor((maxhps(2)-hps(2))*basefuel(2)*0.06);
 end
-if hps(3) <= maxhps(3)/4 % only bucket hatsu on chuuha
+if hps(3) <= maxhps(3)/4 % only bucket hatsu on taiha
     output = output + 1;
+    repairfuel = repairfuel + floor((maxhps(3)-hps(3))*basefuel(3)*0.032);
+    repairsteel = repairsteel + floor((maxhps(3)-hps(3))*basefuel(3)*0.06);
 end
 if hps(4) <= maxhps(4)/2
     output = output + 1;
+    repairfuel = repairfuel + floor((maxhps(4)-hps(4))*basefuel(4)*0.032);
+    repairsteel = repairsteel + floor((maxhps(4)-hps(4))*basefuel(4)*0.06);
 end
 if hps(5) <= maxhps(5)/2
     output = output + 1;
+    repairfuel = repairfuel + floor((maxhps(5)-hps(5))*basefuel(5)*0.032);
+    repairsteel = repairsteel + floor((maxhps(5)-hps(5))*basefuel(5)*0.06);
 end
 if hps(6) <= maxhps(6)/2
     output = output + 1;
+    repairfuel = repairfuel + floor((maxhps(6)-hps(6))*basefuel(6)*0.032);
+    repairsteel = repairsteel + floor((maxhps(6)-hps(6))*basefuel(6)*0.06);
 end
-
-hps = hps./maxhps;
-
 
 end
